@@ -1,0 +1,106 @@
+name: Build and Release
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      - name: Build
+        run: cmake --build build --config ${{env.BUILD_TYPE}}
+      - name: Upload macOS Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-macos
+          path: build/lights_monitor_macos
+
+  build-macos-arm64:
+    runs-on: macos-14 # Apple Silicon runner
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure CMake for ARM64
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_OSX_ARCHITECTURES=arm64
+      - name: Build
+        run: cmake --build build --config ${{env.BUILD_TYPE}}
+      - name: Upload macOS ARM64 Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-macos-arm64
+          path: build/lights_monitor_macos_arm64
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake g++ make
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      - name: Build
+        run: cmake --build build --config ${{env.BUILD_TYPE}}
+      - name: Upload Linux Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-linux
+          path: build/lights_monitor_linux
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      - name: Build
+        run: cmake --build build --config ${{env.BUILD_TYPE}}
+      - name: Upload Windows Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-windows
+          path: build/${{env.BUILD_TYPE}}/lights_monitor_windows.exe
+
+  create-release:
+    needs: [build-macos, build-macos-arm64, build-linux, build-windows]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Tag the commit
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git tag release-${{ github.run_number }}
+          git push origin release-${{ github.run_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List downloaded files
+        run: ls -R ./artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: release-${{ github.run_number }}
+          name: Release ${{ github.run_number }}
+          files: |
+            artifacts/binary-macos/lights_monitor
+            artifacts/binary-macos-arm64/lights_monitor
+            artifacts/binary-linux/lights_monitor
+            artifacts/binary-windows/lights_monitor.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
