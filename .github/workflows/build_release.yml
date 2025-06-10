@@ -75,37 +75,21 @@ jobs:
         with:
           name: binary-windows
           path: build/${{env.BUILD_TYPE}}/lights_monitor_windows.exe
-
   create-release:
     needs: [build-macos, build-macos-arm64, build-linux, build-windows]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
-      - uses: actions/checkout@v4
-
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
-
-      - name: Tag the commit
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
-          git tag release-${{ github.run_number }}
-          git push origin release-${{ github.run_number }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: List downloaded files
-        run: ls -R ./artifacts
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: release-${{ github.run_number }}
           name: Release ${{ github.run_number }}
-          files: |
+          files: >
             artifacts/binary-macos/lights_monitor_macos
             artifacts/binary-macos-arm64/lights_monitor_macos_arm64
             artifacts/binary-linux/lights_monitor_linux
