@@ -43,6 +43,10 @@ Alternatively, you can run the application by using the script `makerun.sh` prov
 
 Without specified arguments when running the application, it will use the default host `localhost` and port `8080`.
 
+### Don't Want to Build it Yourself?
+
+You can download the pre-built binary from the latest [releases](https://github.com/quiyetbrul/JoshCppCodingChallenge/releases) page, download the appropriate binary for your platform, and run it directly without building it yourself.
+
 ## Project Structure
 
 - `libs/`: Contains header files.
@@ -62,10 +66,11 @@ Without specified arguments when running the application, it will use the defaul
   - The application requests `get lights/` from the API to retrieve concise information about the lights, which includes `id`, `name`, `room`.
   - The concise information is stored in a map<id, Light{}>. Since the API does not provide a way to get the full state of the lights, the application uses the `get light/<id>` endpoint to retrieve the full state of each light.
 - Do the same steps for the current state of the lights.
-- The application then compares the previous state with the current state to detect changes:
+- The application then compares the previous default state with the current state to detect changes:
   - If a light is present in the current state but not in the previous state, it is considered added.
   - If a light is present in the previous state but not in the current state, it is considered removed.
   - If a light is present in both states, it is checked for property changes.
+- The current state map is then updated to the previous state map for the next iteration.
 - The application prints the changes in JSON format, including added, removed, and changed lights.
 
 ## Error Handling
@@ -80,6 +85,7 @@ Without specified arguments when running the application, it will use the defaul
 - I completely missed that `get lights/` returns a list of lights with only `id`, `name`, and `room` properties, so I had to make an additional request for each light to get the full state.
 - I used ChatGPT to help with implementing GitHub Actions that creates and uploads a release artifact.
   - Based on a previous project I worked on, I used the `cmake` and `make` commands to build the project that was deployed on a Docker container.
+  - I've also only run the binary specific to macOS arm64, so I hope it works on other platforms as well.
 - `LightMonitor.Poll()` could potentially be optimized to reduce the number of requests made to the API, but I left it as is for simplicity.
   - Using promises or async/await could improve the performance, but I have not dabbed into that yet.
 - The documentation/comments are Doxygen-style, so there's a possibility to generate documentation using Doxygen if needed.
