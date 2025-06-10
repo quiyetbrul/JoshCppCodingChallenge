@@ -18,6 +18,8 @@ jobs:
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
       - name: Build
         run: cmake --build build --config ${{env.BUILD_TYPE}}
+      - name: Rename binary
+        run: mv build/lights_monitor build/lights_monitor_macos
       - name: Upload macOS Binary
         uses: actions/upload-artifact@v4
         with:
@@ -32,6 +34,8 @@ jobs:
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_OSX_ARCHITECTURES=arm64
       - name: Build
         run: cmake --build build --config ${{env.BUILD_TYPE}}
+      - name: Rename binary
+        run: mv build/lights_monitor build/lights_monitor_macos_arm64
       - name: Upload macOS ARM64 Binary
         uses: actions/upload-artifact@v4
         with:
@@ -48,6 +52,8 @@ jobs:
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
       - name: Build
         run: cmake --build build --config ${{env.BUILD_TYPE}}
+      - name: Rename binary
+        run: mv build/lights_monitor build/lights_monitor_linux
       - name: Upload Linux Binary
         uses: actions/upload-artifact@v4
         with:
@@ -62,6 +68,8 @@ jobs:
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
       - name: Build
         run: cmake --build build --config ${{env.BUILD_TYPE}}
+      - name: Rename binary
+        run: Rename-Item -Path build\${{env.BUILD_TYPE}}\lights_monitor.exe -NewName lights_monitor_windows.exe
       - name: Upload Windows Binary
         uses: actions/upload-artifact@v4
         with:
@@ -98,9 +106,9 @@ jobs:
           tag_name: release-${{ github.run_number }}
           name: Release ${{ github.run_number }}
           files: |
-            artifacts/binary-macos/lights_monitor
-            artifacts/binary-macos-arm64/lights_monitor
-            artifacts/binary-linux/lights_monitor
-            artifacts/binary-windows/lights_monitor.exe
+            artifacts/binary-macos/lights_monitor_macos
+            artifacts/binary-macos-arm64/lights_monitor_macos_arm64
+            artifacts/binary-linux/lights_monitor_linux
+            artifacts/binary-windows/lights_monitor_windows.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
