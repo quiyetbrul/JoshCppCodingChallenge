@@ -31,6 +31,15 @@ struct Light {
   int8_t brightness;
 
   /**
+   * @brief Constructor for creating a light with basic properties
+   * @param id Unique identifier for the light
+   * @param name Display name of the light
+   * @param room Room location where the light is installed
+   */
+  Light(std::string id, std::string name, std::string room)
+      : id(id), name(name), room(room) {}
+
+  /**
    * @brief Constructor for creating a light with all properties
    * @param id Unique identifier for the light
    * @param name Display name of the light
@@ -57,6 +66,21 @@ struct Light {
   }
 
   /**
+   * @brief Creates a Light object from concise API JSON format
+   * @param j JSON object containing basic light properties
+   * @return A new Light object initialized with the provided properties
+   *
+   * Creates a Light object with id, name, room from the API's concise JSON
+   * format.
+   */
+  static Light FromJsonApiConcise(const nlohmann::json &j) {
+    std::string id = j.value("id", "");
+    std::string name = j.value("name", "");
+    std::string room = j.value("room", "");
+    return Light(id, name, room);
+  }
+
+  /**
    * @brief Creates a Light object from full API JSON format
    * @param j JSON object containing all light properties
    * @return A new Light object initialized with the provided properties
@@ -64,7 +88,7 @@ struct Light {
    * Creates a Light object with all properties from the API's full JSON format.
    * Converts the API brightness scale (0-255) to percentage (0-100).
    */
-  static Light FromJsonApi(const nlohmann::json &j) {
+  static Light FromJsonApiFull(const nlohmann::json &j) {
     std::string id = j.value("id", "");
     std::string name = j.value("name", "");
     std::string room = j.value("room", "");

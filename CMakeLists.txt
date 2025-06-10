@@ -19,6 +19,12 @@ include_directories(libs)
 # Add executable
 add_executable(${PROJECT_NAME} src/main.cpp)
 
+# Add subdir/
+add_subdirectory(src/light)
+
+# Link sub-directories
+target_link_libraries(${PROJECT_NAME} PUBLIC light)
+
 # Using INSTALL_RPATH_USE_LINK_PATH
 set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 

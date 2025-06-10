@@ -1,3 +1,5 @@
+#include "light/light_monitor.h"
+
 #include <iostream>
 
 #include "cmdparser.hpp"
@@ -19,7 +21,16 @@ int main(int argc, char **argv) {
   std::string host = parser.get<std::string>("host");
   int port = parser.get<int>("port");
 
+  LightMonitor light_monitor(host, port);
+
+  // Start polling for changes
   std::cout << "Polling " << host << ":" << port << std::endl;
+  while (true) {
+    light_monitor.Poll();
+    // Poll every 2 seconds
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+  }
+
   return 0;
 }
 
